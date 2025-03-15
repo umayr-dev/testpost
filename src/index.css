@@ -1,0 +1,85 @@
+/* Barcha sahifa o'lchamlarini moslashtirish */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Arial", sans-serif;
+}
+
+/* Login sahifasi */
+body {
+  height: 100vh;
+}
+
+/* Login konteyneri */
+.login-container {
+  background: linear-gradient(to right, blueviolet, white);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Eng yuqorida bo‘lishi uchun */
+}
+
+
+
+/* Login form */
+.login-form {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  text-align: center;
+}
+
+/* Form sarlavhasi */
+h2 {
+  color: blueviolet;
+  margin-bottom: 15px;
+}
+
+/* Input maydonlar */
+.input-field {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 2px solid blueviolet;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.input-field:focus {
+  border-color: darkviolet;
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+/* Tugma */
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background: blueviolet;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-button:hover {
+  background: darkviolet;
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.7);
+}
+
+/* Xatolik xabari */
+.error-message {
+  color: red;
+  font-size: 14px;
+}
