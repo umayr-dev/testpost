@@ -35,7 +35,7 @@ const Main = () => {
         getItem('Kanal va Guruh', '1', <PieChartOutlined />, () => navigate('/channel')),
         getItem('Testlar', '2', <DesktopOutlined />, () => navigate('/tests')),
         getItem('User', '3', <UsergroupAddOutlined />,() =>navigate('/user')),
-        getItem('Chiqish', '4', <LogoutOutlined />, () => {
+        getItem('Chiqish', '4', <LogoutOutlined style={{color: 'red'}} />, () => {
             localStorage.removeItem('token'); // 🔥 Tokenni o‘chirish (logout)
             navigate('/login'); // Login sahifasiga yo‘naltirish
         }),
@@ -95,8 +95,9 @@ const Main = () => {
                     </div>
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>
-                    Ant Design ©{new Date().getFullYear()} Created by Ant UED
+                    umar.dev ©{new Date().getFullYear()} Created by
                 </Footer>
+
             </Layout>
         </Layout>
     );
