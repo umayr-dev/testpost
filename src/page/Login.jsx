@@ -21,7 +21,7 @@ const Login = () => {
       const fakeToken = "test12345"; // Sinov uchun token
       localStorage.setItem("token", fakeToken); // Tokenni saqlaymiz
      message.success("Login muvafaqqiyatli")
-      navigate("/dashboard"); // Dashboard'ga o'tamiz
+      navigate("/channel"); // Dashboard'ga o'tamiz
     } else {
       setError("❌ Login yoki parol noto‘g‘ri!");
     }

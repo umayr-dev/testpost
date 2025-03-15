@@ -2,11 +2,9 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Login from "../page/Login";
 import Channel from "../page/Channel";
 import Tests from "../page/Tests";
-import Dashboard from "../page/Dashboard";
 import ProtectedRoute from "../page/ProtectedRoute"; // 🔥 Import qilish
 
 import {
-    AreaChartOutlined,
     DesktopOutlined,
     LogoutOutlined,
     PieChartOutlined,
@@ -15,6 +13,7 @@ import {
 } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd';
 import { useState } from 'react';
+import User from "../page/User";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -33,12 +32,10 @@ const Main = () => {
     const [collapsed, setCollapsed] = useState(false);
 
     const items = [
-        getItem('Dashboard', '1', <AreaChartOutlined />, () => navigate('/dashboard')),
-        getItem('Kanal va Guruh', '2', <PieChartOutlined />, () => navigate('/channel')),
-        getItem('Testlar', '3', <DesktopOutlined />, () => navigate('/tests')),
-        getItem('User', 'sub1', <UsergroupAddOutlined />, null, [
-        ]),
-        getItem('Chiqish', '5', <LogoutOutlined />, () => {
+        getItem('Kanal va Guruh', '1', <PieChartOutlined />, () => navigate('/channel')),
+        getItem('Testlar', '2', <DesktopOutlined />, () => navigate('/tests')),
+        getItem('User', '3', <UsergroupAddOutlined />,() =>navigate('/user')),
+        getItem('Chiqish', '4', <LogoutOutlined />, () => {
             localStorage.removeItem('token'); // 🔥 Tokenni o‘chirish (logout)
             navigate('/login'); // Login sahifasiga yo‘naltirish
         }),
@@ -67,14 +64,6 @@ const Main = () => {
                             
                             {/* 🔐 HIMOYALI ROUTE */}
                             <Route
-                                path="/dashboard"
-                                element={
-                                    <ProtectedRoute>
-                                        <Dashboard />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
                                 path="/channel"
                                 element={
                                     <ProtectedRoute>
@@ -82,11 +71,20 @@ const Main = () => {
                                     </ProtectedRoute>
                                 }
                             />
+
                             <Route
                                 path="/tests"
                                 element={
                                     <ProtectedRoute>
                                         <Tests />
+                                    </ProtectedRoute>
+                                }
+                            />
+                             <Route
+                                path="/user"
+                                element={
+                                    <ProtectedRoute>
+                                        <User />
                                     </ProtectedRoute>
                                 }
                             />
