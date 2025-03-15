@@ -10,9 +10,10 @@ import {
     DesktopOutlined,
     LogoutOutlined,
     PieChartOutlined,
+    UsergroupAddOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Layout, Menu, theme } from 'antd';
 import { useState } from 'react';
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -32,12 +33,12 @@ const Main = () => {
     const [collapsed, setCollapsed] = useState(false);
 
     const items = [
-        getItem('Dashboard', '7', <AreaChartOutlined />, () => navigate('/dashboard')),
-        getItem('Kanal va Guruh', '1', <PieChartOutlined />, () => navigate('/channel')),
-        getItem('Testlar', '2', <DesktopOutlined />, () => navigate('/tests')),
-        getItem('User', 'sub1', <UserOutlined />, null, [
+        getItem('Dashboard', '1', <AreaChartOutlined />, () => navigate('/dashboard')),
+        getItem('Kanal va Guruh', '2', <PieChartOutlined />, () => navigate('/channel')),
+        getItem('Testlar', '3', <DesktopOutlined />, () => navigate('/tests')),
+        getItem('User', 'sub1', <UsergroupAddOutlined />, null, [
         ]),
-        getItem('Chiqish', '10', <LogoutOutlined />, () => {
+        getItem('Chiqish', '5', <LogoutOutlined />, () => {
             localStorage.removeItem('token'); // 🔥 Tokenni o‘chirish (logout)
             navigate('/login'); // Login sahifasiga yo‘naltirish
         }),
@@ -54,13 +55,13 @@ const Main = () => {
                 <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items} />
             </Sider>
             <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer }} />
+                <Header style={{ padding: 20, display: "flex", alignItems: "center", background: colorBgContainer }}>
+                    <div>
+                        <h1 ><UserOutlined /><span className="logo">Welcome Admin</span></h1>
+                    </div>
+                </Header>
                 <Content style={{ margin: '0 16px' }}>
-                    <Breadcrumb style={{ margin: '16px 0' }}>
-                        <Breadcrumb.Item>User</Breadcrumb.Item>
-                        <Breadcrumb.Item>Bill</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <div style={{ padding: 24, minHeight: 360, background: colorBgContainer, borderRadius: borderRadiusLG }}>
+                    <div style={{ padding: 24, marginTop: 50, minHeight: 560, background: colorBgContainer, borderRadius: borderRadiusLG }}>
                         <Routes>
                             <Route path="/login" element={<Login />} />
                             
