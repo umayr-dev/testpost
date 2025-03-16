@@ -1,19 +1,17 @@
-import { useRef, useState, useEffect } from 'react';
-import { SearchOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Input, Space, Table, message, Modal, Form } from 'antd';
+import { useState, useEffect } from 'react';
+import {  DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Input,  Table, message, Modal, Form } from 'antd';
 import axios from 'axios';
 
 const API_URL = "https://testpost.uz/users/";
 
 const User = () => {
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
   const [data, setData] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const searchInput = useRef(null);
+  // const searchInput = useRef(null);
 
   useEffect(() => {
     fetchData();
@@ -24,7 +22,8 @@ const User = () => {
       const response = await axios.get(API_URL);
       setData(response.data.map((user) => ({ key: user.id, username: user.username, status: user.status })));
     } catch (error) {
-      message.error("Foydalanuvchilarni yuklashda xatolik yuz berdi");
+      console.error("Foydalanuvchi yuklashda xatolik:", error);
+    message.warning("Foydalanuvchi yuklashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
     }
   };
 
@@ -34,7 +33,8 @@ const User = () => {
       message.success("Foydalanuvchi o‘chirildi");
       fetchData();
     } catch (error) {
-      message.error("Foydalanuvchini o‘chirishda xatolik yuz berdi");
+      console.error("Foydalanuvchi ochirishda xatolik:", error);
+    message.warning("Foydalanuvchi ochirishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
     }
     setIsDeleteModalOpen(false);
   };
@@ -52,7 +52,8 @@ const User = () => {
       setIsAddModalOpen(false);
       form.resetFields();
     } catch (error) {
-      message.error("Admin qo‘shishda xatolik yuz berdi");
+      console.error("Admin qo‘shishda xatolik:", error);
+    message.warning("Admin qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
     }
   };
 
@@ -79,6 +80,7 @@ const User = () => {
   return (
     <div>
       <div className='header-user'>
+        <p>Foydalanuvchi qo`shish</p>
       <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setIsAddModalOpen(true); }} style={{ marginBottom: 16 }}>
         Admin qo‘shish
       </Button>

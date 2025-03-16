@@ -87,7 +87,7 @@ const Main = () => {
                                         <User />
                                     </ProtectedRoute>
                                 }
-                            />
+                            /> 
                             
                             {/* ❌ Noto‘g‘ri sahifa bo‘lsa, login sahifasiga yo‘naltirish */}
                             <Route path="*" element={<Navigate to="/login" replace />} />
@@ -95,7 +95,7 @@ const Main = () => {
                     </div>
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>
-                    umar.dev ©{new Date().getFullYear()} Created by
+                    umar.dev ©{new Date().getFullYear()} Created by Techsy team
                 </Footer>
 
             </Layout>

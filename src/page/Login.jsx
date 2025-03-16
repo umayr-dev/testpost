@@ -42,7 +42,8 @@ const Login = () => {
         setError("❌ Login yoki parol noto‘g‘ri!");
       }
     } catch (error) {
-      setError("Tarmoq xatosi");
+      console.error("Login da:", error);
+    message.warning("Login qilishda muammo boldi, iltimos  qaytadan urinib koring")
     } finally {
       setIsLoading(false);
     }

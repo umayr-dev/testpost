@@ -10,7 +10,7 @@ const Channel = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [newChannel, setNewChannel] = useState({ group_name: '', group_id: '', group_url: '' });
+  const [newChannel, setNewChannel] = useState({ group_name: '', group_url: '' });
   
 
   useEffect(() => {
@@ -22,7 +22,8 @@ const Channel = () => {
       const response = await axios.get(API_URL);
       setData(response.data.map((item) => ({ key: item.id, ...item })));
     } catch (error) {
-      message.error("Ma'lumotlarni yuklashda xatolik yuz berdi");
+      console.error("kanal qo‘shishda xatolik:", error);
+    message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
     }
   };
 
@@ -33,7 +34,7 @@ const Channel = () => {
   };
 
   const handleAddNew = () => {
-    setNewChannel({ group_name: '', group_id: '', group_url: '' });
+    setNewChannel({ group_name: '', group_url: '' });
     setIsAdding(true);
     setIsModalOpen(true);
   };
@@ -51,7 +52,8 @@ const Channel = () => {
         setData([...data, response.data]);
         message.success("Yangi kanal qo‘shildi!");
       } catch (error) {
-        message.error("Yangi kanal qo‘shishda xatolik yuz berdi");
+        console.error("kanal qo‘shishda xatolik:", error);
+        message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
       }
     } else {
       try {
@@ -61,7 +63,9 @@ const Channel = () => {
         );
         message.success("Tahrirlangan kanal saqlandi!");
       } catch (error) {
-        message.error("Kanalni tahrirlashda xatolik yuz berdi");
+        // message.error("Kanalni tahrirlashda xatolik yuz berdi");
+        console.error("kanal qo‘shishda xatolik:", error);
+    message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
       }
     }
     setIsModalOpen(false);
@@ -75,7 +79,8 @@ const Channel = () => {
       setData(data.filter((item) => item.id !== id));
       message.success("Kanal o‘chirildi!");
     } catch (error) {
-      message.error("Kanalni o‘chirishda xatolik yuz berdi");
+      console.error("kanal qo‘shishda xatolik:", error);
+    message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
     }
   };
 
@@ -92,12 +97,12 @@ const Channel = () => {
       title: 'Kanal nomi',
       dataIndex: 'group_name',
       key: 'group_name',
-    },
-    {
-      title: 'Group ID',
-      dataIndex: 'group_id',
-      key: 'group_id',
-    },
+     },
+    // {
+    //   title: 'Group ID',
+    //   dataIndex: 'group_id',
+    //   key: 'group_id',
+    // },
     {
       title: 'Kanal havolasi',
       dataIndex: 'group_url',
@@ -136,12 +141,7 @@ const Channel = () => {
           onChange={(e) => handleInputChange(e, 'group_name', isAdding)}
           style={{ marginBottom: 10 }}
         />
-        <Input
-          placeholder="Group ID"
-          value={isAdding ? newChannel.group_id : editingRecord?.group_id || ''}
-          onChange={(e) => handleInputChange(e, 'group_id', isAdding)}
-          style={{ marginBottom: 10 }}
-        />
+       
         <Input
           placeholder="Kanal havolasi"
           value={isAdding ? newChannel.group_url : editingRecord?.group_url || ''}
