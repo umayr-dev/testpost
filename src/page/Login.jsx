@@ -1,29 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../index.css";
 import { message } from "antd";
+import "../index.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/channel");
+    }
+  }, [navigate]);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    // Sinov uchun qo'lda belgilangan username va parol
-    const testUsername = "admin";
-    const testPassword = "123456";
+    try {
+      const response = await fetch("https://testpost.uz/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (username === testUsername && password === testPassword) {
-      const fakeToken = "test12345"; // Sinov uchun token
-      localStorage.setItem("token", fakeToken); // Tokenni saqlaymiz
-     message.success("Login muvafaqqiyatli")
-      navigate("/channel"); // Dashboard'ga o'tamiz
-    } else {
-      setError("❌ Login yoki parol noto‘g‘ri!");
+      const data = await response.json();
+
+      if (response.ok && data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", username); // Username saqlash
+        message.success("Login muvaffaqiyatli");
+        navigate("/channel");
+      } else {
+        setError("❌ Login yoki parol noto‘g‘ri!");
+      }
+    } catch (error) {
+      setError("Tarmoq xatosi");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,8 +67,8 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit" className="login-button">
-          🚀 Kirish
+        <button type="submit" className="login-button" disabled={isLoading}>
+          {isLoading ? "⏳ Yuklanmoqda..." : "🚀 Kirish"}
         </button>
       </form>
     </div>

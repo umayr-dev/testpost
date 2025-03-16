@@ -30,7 +30,7 @@ function getItem(label, key, icon, onClick, children) {
 const Main = () => {
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = useState(false);
-
+    const username = localStorage.getItem("username");
     const items = [
         getItem('Kanal va Guruh', '1', <PieChartOutlined />, () => navigate('/channel')),
         getItem('Testlar', '2', <DesktopOutlined />, () => navigate('/tests')),
@@ -44,7 +44,7 @@ const Main = () => {
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
-
+    
     return (
         <Layout style={{ minHeight: '100vh' }}>
             <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
@@ -54,7 +54,7 @@ const Main = () => {
             <Layout>
                 <Header style={{ padding: 20, display: "flex", alignItems: "center", background: colorBgContainer }}>
                     <div>
-                        <h1 ><UserOutlined /><span className="logo">Welcome Admin</span></h1>
+                        <h1 className="logo-div" ><UserOutlined /><span className="logo">Xush Kelibsiz, {username ? username : 'Mehmon'}</span></h1>
                     </div>
                 </Header>
                 <Content style={{ margin: '0 16px' }}>
