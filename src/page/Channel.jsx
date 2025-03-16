@@ -1,6 +1,5 @@
-import {  useState, useEffect } from 'react';
-import { Button, Input, Space, Table, message, Modal } from 'antd';
-
+import { useState, useEffect } from 'react';
+import { Button, Input, Space, Table, message, Modal, Radio } from 'antd';
 import axios from 'axios';
 
 const API_URL = "https://testpost.uz/chanel_groups/";
@@ -10,8 +9,11 @@ const Channel = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
-  const [newChannel, setNewChannel] = useState({ group_name: '', group_url: '' });
-  
+  const [newChannel, setNewChannel] = useState({
+    group_name: '',
+    group_url: '',
+    channel_type: 'id', // default 'id' selected
+  });
 
   useEffect(() => {
     fetchData();
@@ -23,7 +25,7 @@ const Channel = () => {
       setData(response.data.map((item) => ({ key: item.id, ...item })));
     } catch (error) {
       console.error("kanal qo‘shishda xatolik:", error);
-    message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
+      message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
     }
   };
 
@@ -34,7 +36,7 @@ const Channel = () => {
   };
 
   const handleAddNew = () => {
-    setNewChannel({ group_name: '', group_url: '' });
+    setNewChannel({ group_name: '', group_url: '', channel_type: 'id' });
     setIsAdding(true);
     setIsModalOpen(true);
   };
@@ -46,6 +48,11 @@ const Channel = () => {
   };
 
   const handleSave = async () => {
+    if (!newChannel.group_name) {
+      message.warning("Kanal nomini kiriting!");
+      return;
+    }
+
     if (isAdding) {
       try {
         const response = await axios.post(API_URL, newChannel);
@@ -53,7 +60,7 @@ const Channel = () => {
         message.success("Yangi kanal qo‘shildi!");
       } catch (error) {
         console.error("kanal qo‘shishda xatolik:", error);
-        message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
+        message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
       }
     } else {
       try {
@@ -63,9 +70,8 @@ const Channel = () => {
         );
         message.success("Tahrirlangan kanal saqlandi!");
       } catch (error) {
-        // message.error("Kanalni tahrirlashda xatolik yuz berdi");
         console.error("kanal qo‘shishda xatolik:", error);
-    message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
+        message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
       }
     }
     setIsModalOpen(false);
@@ -80,7 +86,7 @@ const Channel = () => {
       message.success("Kanal o‘chirildi!");
     } catch (error) {
       console.error("kanal qo‘shishda xatolik:", error);
-    message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.")
+      message.warning("kanal qo‘shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
     }
   };
 
@@ -92,17 +98,16 @@ const Channel = () => {
     }
   };
 
+  const handleRadioChange = (e) => {
+    setNewChannel((prev) => ({ ...prev, channel_type: e.target.value }));
+  };
+
   const columns = [
     {
       title: 'Kanal nomi',
       dataIndex: 'group_name',
       key: 'group_name',
-     },
-    // {
-    //   title: 'Group ID',
-    //   dataIndex: 'group_id',
-    //   key: 'group_id',
-    // },
+    },
     {
       title: 'Kanal havolasi',
       dataIndex: 'group_url',
@@ -119,6 +124,9 @@ const Channel = () => {
       ),
     },
   ];
+
+  // Dynamic placeholder based on radio button selection
+  const placeholderText = newChannel.channel_type === 'id' ? 'kanal yoki guruh ID sini yozing' : 'kanal yoki guruh username ni yozing';
 
   return (
     <div>
@@ -141,12 +149,20 @@ const Channel = () => {
           onChange={(e) => handleInputChange(e, 'group_name', isAdding)}
           style={{ marginBottom: 10 }}
         />
-       
         <Input
-          placeholder="Kanal havolasi"
+          placeholder={placeholderText} // Dynamic placeholder
           value={isAdding ? newChannel.group_url : editingRecord?.group_url || ''}
           onChange={(e) => handleInputChange(e, 'group_url', isAdding)}
+          style={{ marginBottom: 10 }}
         />
+        <Radio.Group
+          value={newChannel.channel_type}
+          onChange={handleRadioChange}
+          style={{ marginBottom: 10 }}
+        >
+          <Radio value="id">ID</Radio>
+          <Radio value="username">Username</Radio>
+        </Radio.Group>
       </Modal>
     </div>
   );

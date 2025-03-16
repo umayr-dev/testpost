@@ -17,25 +17,7 @@ function ButtonGridManager({ onButtonChange }) {
   const [explanationText, setExplanationText] = useState(""); // Izoh matni
 
   const MAX_BUTTONS = 30;
-  const prepareButtonsForAPI = () => {
-    return rows.flatMap((row, rowIndex) =>
-      row.buttons.map((button, index) => ({
-        id: button.id,
-        text: button.label,
-        text_response: button.isStatistics
-          ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
-          : button.callbackData,
-        callback_data: button.isStatistics ? "static" : "None",  // Statistika tugmalari uchun "static"
-        row: rowIndex,
-        position: index,
-        is_correct: button.isCorrect,
-        is_comment: button.isExplanation,
-        static: button.isStatistics, // Statistika tugmasi
-        message: 3, // Kerakli o'zgartirishni amalga oshiring
-      }))
-    );
-  };
-  
+
   const handleSwitchChange = (name) => (checked) => {
     if (name === "correctAnswer") {
       if (checked) {
@@ -153,10 +135,12 @@ function ButtonGridManager({ onButtonChange }) {
   const saveButtonEdit = async () => {
     if (!editingButton) return;
   
+    // Callback data yangilanishi
     const updatedCallbackData = isStatistics
       ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
       : editValues.callbackData;
   
+    // Row va buttonlarni yangilash
     const updatedRows = rows.map((row) => {
       if (row.id === editingButton.rowId) {
         const updatedButtons = row.buttons.map((button) => {
@@ -182,24 +166,29 @@ function ButtonGridManager({ onButtonChange }) {
     });
   
     setRows(updatedRows);
-    closeModal();
   
-    // API'ga ma'lumotlarni yuborish
+    // API'ga yuboriladigan payload tayyorlash
+    const payload = prepareButtonsForAPI();
+  
     try {
-      const payload = prepareButtonsForAPI();
+      console.log("Yuborilayotgan payload:", payload); // Payload'ni konsolga chiqarish
+  
+      // POST so'rovini yuborish
       const response = await axios.post(API_URL, payload, {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json', // Kontent tipi JSON
+        },
       });
-      console.log("API javobi:", response);
-      message.success("Tugmalar muvaffaqiyatli saqlandi!");
+  
+      console.log("API javobi:", response); // Javobni konsolga chiqarish
+      message.success("Tugmalar muvaffaqiyatli saqlandi!"); // Muvaffaqiyatli saqlash
+      closeModal(); // Muvaffaqiyatli saqlangandan keyin modalni yopish
     } catch (error) {
-      console.error("Tugmalarni saqlashda xatolik:", error);
-      message.warning("Tugmalarni saqlashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
+      console.error("Tugmalarni saqlashda xatolik:", error); // Xatolik haqida ma'lumot
+      message.warning("Tugmalarni saqlashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring."); // Xatolik xabari
     }
   };
-
+  
   const closeModal = () => {
     setShowModal(false);
     setEditingButton(null);
@@ -230,22 +219,22 @@ function ButtonGridManager({ onButtonChange }) {
     setRows(updatedRows);
   };
 
-//   const prepareButtonsForAPI = () => {
-//     return rows.flatMap((row, rowIndex) =>
-//       row.buttons.map((button, index) => ({
-//         id: button.id,
-//         text: button.label,
-//         text_response: button.isStatistics ? `{count_people} человек выбрали этот ответ ({percent}%)` : button.callbackData,
-//         callback_data: "None",
-//         row: rowIndex,
-//         position: index,
-//         is_correct: button.isCorrect,
-//         is_comment: button.isExplanation,
-//         static: button.isStatistics,
-//         message: 3, // O'zgartiring, kerak bo'lsa
-//       }))
-//     );
-//   };
+  const prepareButtonsForAPI = () => {
+    return rows.flatMap((row, rowIndex) =>
+      row.buttons.map((button, index) => ({
+        id: button.id,
+        text: button.label,
+        text_response: button.isStatistics ? `{count_people} человек выбрали этот ответ ({percent}%)` : button.callbackData,
+        callback_data: "None",
+        row: rowIndex,
+        position: index,
+        is_correct: button.isCorrect,
+        is_comment: button.isExplanation,
+        static: button.isStatistics,
+        message: 3, // O'zgartiring, kerak bo'lsa
+      }))
+    );
+  };
 
   // Call the onButtonChange prop whenever the rows state changes
   useEffect(() => {
@@ -339,6 +328,7 @@ function ButtonGridManager({ onButtonChange }) {
                     checked={isCorrectAnswer}
                     onChange={handleSwitchChange("correctAnswer")}
                     className="modal-switch"
+                    disabled={rows.some(row => row.buttons.some(button => button.isCorrect && button.id !== editingButton.buttonId))}
                   />
                 </div>
                 <div className="form-group">
@@ -357,25 +347,26 @@ function ButtonGridManager({ onButtonChange }) {
                     className="modal-switch"
                   />
                 </div>
+                {isExplanation && (
+                  <div className="form-group">
+                    <label htmlFor="explanationText">Izoh</label>
+                    <textarea
+                      id="explanationText"
+                      value={explanationText}
+                      onChange={(e) => setExplanationText(e.target.value)}
+                      className="modal-textarea"
+                    />
+                  </div>
+                )}
               </div>
-
-              {isExplanation && (
-                <div className="form-group">
-                  <label htmlFor="explanationText">Izoh</label>
-                  <textarea
-                    id="explanationText"
-                    name="explanationText"
-                    value={explanationText}
-                    onChange={(e) => setExplanationText(e.target.value)}
-                    className="modal-input"
-                    placeholder="Izohni kiriting..."
-                  />
-                </div>
-              )}
             </div>
             <div className="modal-footer">
-              <button className="save-button" onClick={saveButtonEdit}>Save</button>
-              <button className="cancel-button" onClick={closeModal}>Cancel</button>
+              <button className="modal-button" onClick={saveButtonEdit}>
+                Save
+              </button>
+              <button className="modal-button" onClick={closeModal}>
+                Cancel
+              </button>
             </div>
           </div>
         </div>
