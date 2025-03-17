@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import { Switch, message } from "antd";
-import axios from "axios";
 import "../button.css";
 
-const API_URL = "https://testpost.uz/inline_buttons/";
-
-function ButtonGridManager({ onButtonChange }) {
+function ButtonGridManager( testid,{ onButtonChange }) {
   const [rows, setRows] = useState([]);
   const [totalButtons, setTotalButtons] = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -15,7 +13,7 @@ function ButtonGridManager({ onButtonChange }) {
   const [isStatistics, setIsStatistics] = useState(false);
   const [isExplanation, setIsExplanation] = useState(false);
   const [explanationText, setExplanationText] = useState(""); // Izoh matni
-
+  
   const MAX_BUTTONS = 30;
 
   const handleSwitchChange = (name) => (checked) => {
@@ -29,7 +27,7 @@ function ButtonGridManager({ onButtonChange }) {
       }
     } else if (name === "statistics") {
       if (checked) {
-        setIsStatistics(true);
+        setIsStatistics(true);  
         setIsCorrectAnswer(false);
         setIsExplanation(false);
       } else {
@@ -135,31 +133,29 @@ function ButtonGridManager({ onButtonChange }) {
   const saveButtonEdit = async () => {
     if (!editingButton) return;
   
-    // Callback data yangilanishi
-    const updatedCallbackData = isStatistics
-      ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
-      : editValues.callbackData;
-  
-    // Row va buttonlarni yangilash
+    // Hozirgi holatda barcha tugmalarni emas, faqat tahrirlangan tugmani API'ga yuboramiz.
     const updatedRows = rows.map((row) => {
       if (row.id === editingButton.rowId) {
-        const updatedButtons = row.buttons.map((button) => {
-          if (button.id === editingButton.buttonId) {
-            return {
-              ...button,
-              label: editValues.label,
-              callbackData: updatedCallbackData,
-              isCorrect: isCorrectAnswer,
-              isStatistics,
-              isExplanation,
-              explanationText: isExplanation ? explanationText : "",
-            };
-          }
-          return button;
-        });
         return {
           ...row,
-          buttons: updatedButtons,
+          buttons: row.buttons.map((button) => {
+            if (button.id === editingButton.buttonId) {
+              return {
+                ...button,
+                label: editValues.label,
+                callbackData: isStatistics
+                  ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
+                  : isExplanation
+                  ? explanationText
+                  : editValues.callbackData,
+                isCorrect: isCorrectAnswer,
+                isStatistics,
+                isExplanation,
+                explanationText: isExplanation ? explanationText : "",
+              };
+            }
+            return button;
+          }),
         };
       }
       return row;
@@ -167,27 +163,42 @@ function ButtonGridManager({ onButtonChange }) {
   
     setRows(updatedRows);
   
-    // API'ga yuboriladigan payload tayyorlash
-    const payload = prepareButtonsForAPI();
+    // API'ga yuborish uchun bitta tugmani ajratib olish
+    const updatedButton = updatedRows
+      .flatMap(row => row.buttons)
+      .find(button => button.id === editingButton.buttonId);
+  
+    if (!updatedButton) return;
+  
+    const payload = {
+      id: updatedButton.id,
+      text: updatedButton.label,
+      text_response: updatedButton.callbackData,
+      callback_data: "None",
+      row: rows.findIndex(row => row.id === editingButton.rowId),
+      position: updatedButton.position,
+      is_correct: updatedButton.isCorrect,
+      is_comment: updatedButton.isExplanation,
+      static: updatedButton.isStatistics,
+      message: 3,
+    };
   
     try {
-      console.log("Yuborilayotgan payload:", payload); // Payload'ni konsolga chiqarish
+      console.log("API'ga yuborilayotgan payload:", payload);
   
-      // POST so'rovini yuborish
-      const response = await axios.post(API_URL, payload, {
-        headers: {
-          'Content-Type': 'application/json', // Kontent tipi JSON
-        },
-      });
+      // const response = await axios.post(API_URL, payload, {
+      //   headers: { "Content-Type": "application/json" },
+      // });
   
-      console.log("API javobi:", response); // Javobni konsolga chiqarish
-      message.success("Tugmalar muvaffaqiyatli saqlandi!"); // Muvaffaqiyatli saqlash
-      closeModal(); // Muvaffaqiyatli saqlangandan keyin modalni yopish
+      // console.log("API javobi:", response.data);
+      message.success("Tugma muvaffaqiyatli saqlandi!");
+      closeModal();
     } catch (error) {
-      console.error("Tugmalarni saqlashda xatolik:", error); // Xatolik haqida ma'lumot
-      message.warning("Tugmalarni saqlashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring."); // Xatolik xabari
+      console.error("Xatolik:", error);
+      message.error("Tugma saqlanmadi, qayta urinib ko‘ring.");
     }
   };
+  
   
   const closeModal = () => {
     setShowModal(false);
@@ -219,27 +230,28 @@ function ButtonGridManager({ onButtonChange }) {
     setRows(updatedRows);
   };
 
-  const prepareButtonsForAPI = () => {
-    return rows.flatMap((row, rowIndex) =>
-      row.buttons.map((button, index) => ({
-        id: button.id,
-        text: button.label,
-        text_response: button.isStatistics ? `{count_people} человек выбрали этот ответ ({percent}%)` : button.callbackData,
-        callback_data: "None",
-        row: rowIndex,
-        position: index,
-        is_correct: button.isCorrect,
-        is_comment: button.isExplanation,
-        static: button.isStatistics,
-        message: 3, // O'zgartiring, kerak bo'lsa
-      }))
-    );
-  };
 
-  // Call the onButtonChange prop whenever the rows state changes
-  useEffect(() => {
-    onButtonChange(prepareButtonsForAPI());
-  }, [rows]);
+const prepareButtonsForAPI = useCallback(() => {
+  return rows.flatMap((row, rowIndex) =>
+    row.buttons.map((button, index) => ({
+      id: button.id,
+      text: button.label,
+      text_response: button.isStatistics ? `{count_people} человек выбрали этот ответ ({percent}%)` : button.callbackData,
+      callback_data: "None",
+      row: rowIndex,
+      position: index,
+      is_correct: button.isCorrect,
+      is_comment: button.isExplanation,
+      static: button.isStatistics,
+      message: 3,
+    }))
+  );
+}, [rows]);
+
+useEffect(() => {
+  // onButtonChange(prepareButtonsForAPI());
+}, [rows, onButtonChange, prepareButtonsForAPI]);
+
 
   return (
     <div className="button-grid-container">

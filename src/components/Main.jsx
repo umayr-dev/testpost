@@ -94,9 +94,12 @@ const Main = () => {
                         </Routes>
                     </div>
                 </Content>
+                <a href="https://t.me/umar_software">
+
                 <Footer style={{ textAlign: 'center' }}>
                     umar.dev ©{new Date().getFullYear()} Created by Techsy team
                 </Footer>
+                </a>
 
             </Layout>
         </Layout>

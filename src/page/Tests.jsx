@@ -70,16 +70,16 @@ const Tests = () => {
         buttons: buttonData, // Send button data as well
       });
       message.success("Yangi test qo‘shildi!");
-      setIsModalOpen(false);
       fetchData();
     } catch (error) {
       console.error("Testni qo'shishda xatolik:", error);
       message.warning("Testni qo'shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
     }
   };
-
+  const [editTestId, setEditTestId] = useState(null); // Tahrirlanayotgan test ID sini saqlash uchu
   const handleEditTest = (record) => {
     setEditRecord(record);
+    setEditTestId(record.key);
     editForm.setFieldsValue({
       testName: record.testName,
       text: record.text,
@@ -194,7 +194,7 @@ const Tests = () => {
         }}
         footer={null}
       >
-        <Form form={form} onFinish={handleAddTest}>
+         <Form form={form} >
           <Form.Item name="testName" label="Test nomi" rules={[{ required: true, message: 'Test nomini kiriting!' }]}>
             <Input />
           </Form.Item>
@@ -203,7 +203,7 @@ const Tests = () => {
           </Form.Item>
           <Form.Item>
             <ButtonGridManager onButtonChange={setButtonData} /> {/* ButtonGridManager qo‘shish */}
-            <Button type="primary" htmlType="submit">Saqlash</Button>
+            <Button type="primary" onClick={handleAddTest}>Saqlash</Button>
           </Form.Item>
         </Form>
       </Modal>
@@ -212,13 +212,13 @@ const Tests = () => {
       <Modal title="Testni tahrirlash" open={isEditModalOpen} onCancel={() => setIsEditModalOpen(false)} footer={null}>
         <Form form={editForm} onFinish={handleUpdateTest}>
           <Form.Item name="testName" label="Test nomi" rules={[{ required: true, message: 'Test nomini kiriting!' }]}>
-            <Input />
+            <Input maxLength={200}/>
           </Form.Item>
           <Form.Item name="text" label="Savol" rules={[{ required: true, message: 'Textni kiriting!' }]}>
             <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 4, maxRows: 4 }} style={{ resize: 'none' }} />
           </Form.Item>
           <Form.Item>
-            <ButtonGridManager value={buttonData} onButtonChange={setButtonData} /> {/* ButtonGridManager qo‘shish */}
+            <ButtonGridManager value={buttonData} testId={editTestId}  onButtonChange={setButtonData} /> {/* ButtonGridManager qo‘shish */}
             <Button type="primary" htmlType="submit">Yangilash</Button>
           </Form.Item>
         </Form>
