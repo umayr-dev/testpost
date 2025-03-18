@@ -81,9 +81,9 @@ const User = () => {
     <div>
       <div className='header-user'>
         <p>Foydalanuvchi qo`shish</p>
-      <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setIsAddModalOpen(true); }} style={{ marginBottom: 16 }}>
+      {/* <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setIsAddModalOpen(true); }} style={{ marginBottom: 16 }}>
         Admin qo‘shish
-      </Button>
+      </Button> */}
       </div>
       <Table columns={columns} dataSource={data} rowKey="key" />
       
