@@ -69,7 +69,6 @@ const AddButton = () => {
         id: button.id,
         message: selectedQuestion,
         text: button.label,
-        text_response: null,
         callback_data: button.callbackData || 'None',
         row: button.row,
         position: button.position,
@@ -88,7 +87,7 @@ const AddButton = () => {
     };
 
     try {
-      await axios.post('https://testpost.uz/botmessages/', payload, {
+      await axios.patch('https://testpost.uz/botmessages/', payload, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -174,7 +173,7 @@ const AddButton = () => {
     const updatedButton = {
       text: values.label,
       text_response:
-        values.callbackData ||
+        values.callbackData ??
         (isStatic
           ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
           : `{count_people} человек выбрали этот ответ ({percent}%)`),
@@ -276,7 +275,6 @@ const AddButton = () => {
                 icon={<EditOutlined />}
                 onClick={() => handleEdit(record)}
               />
-            
             </Space>
           )}
         />
