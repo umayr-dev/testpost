@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Space, Table, Button, Modal, Form, Input, message, Select, Switch } from 'antd';
+import {
+  Space,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  message,
+  Select,
+  Switch,
+} from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Column } = Table;
@@ -9,7 +20,9 @@ const AddButton = () => {
   const [questions, setQuestions] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditButtonModalOpen, setIsEditButtonModalOpen] = useState(false);
-  const [rows, setRows] = useState([{ id: Date.now().toString(), buttons: [] }]);
+  const [rows, setRows] = useState([
+    { id: Date.now().toString(), buttons: [] },
+  ]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [editingButton, setEditingButton] = useState(null); // Tahrirlanayotgan tugma
   const MAX_BUTTONS = 30;
@@ -17,17 +30,20 @@ const AddButton = () => {
   const MAX_ROWS = 10;
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchData = async () => {
       try {
         const response = await axios.get('https://testpost.uz/botmessages/');
-        setQuestions(response.data.map((item) => ({ id: item.id, name: item.command })));
+        setData(response.data);
+        setQuestions(
+          response.data.map((item) => ({ id: item.id, name: item.command })),
+        );
       } catch (error) {
-        console.error("Savollarni yuklashda xatolik:", error);
-        message.error("Savollarni yuklashda muammo bo‘ldi.");
+        console.error('Data yuklashda xatolik:', error);
+        message.error("Data yuklashda muammo bo'ldi.");
       }
     };
 
-    fetchQuestions();
+    fetchData();
   }, []);
 
   const resetModal = () => {
@@ -37,51 +53,58 @@ const AddButton = () => {
 
   const handleAdd = async () => {
     if (!selectedQuestion) {
-      message.error('Savolni tanlang!');
+      message.error('Please select a question!');
       return;
     }
-  
+
     const totalButtons = rows.reduce((acc, row) => acc + row.buttons.length, 0);
     if (totalButtons === 0) {
-      message.error('Hech qanday tugma qo‘shilmagan!');
+      message.error('No buttons added!');
       return;
     }
-  
-    // API'ga yuboriladigan ma'lumotlarni tayyorlash
+
+    // Format buttons according to the required structure
     const buttons = rows.flatMap((row) =>
       row.buttons.map((button) => ({
-        text: button.label, // Tugma nomi
-        callback_data: button.callbackData || 'None', // Callback ma'lumot
-      }))
+        id: button.id,
+        message: selectedQuestion,
+        text: button.label,
+        text_response: null,
+        callback_data: button.callbackData || 'None',
+        row: button.row,
+        position: button.position,
+        is_correct: button.is_correct || false,
+        is_comment: button.is_comment || false,
+        static: button.static || false,
+      })),
     );
-  
+
     const payload = {
-      id: selectedQuestion, // Tanlangan savol ID'si
-      command: questions.find((q) => q.id === selectedQuestion)?.name || '', // Savol matni
-      text: questions.find((q) => q.id === selectedQuestion)?.name || '', // Savol matni
-      photo: null, // Test rasmi (agar kerak bo'lsa, bu yerda rasmni boshqarishingiz mumkin)
-      buttons, // Tugmalar
+      id: selectedQuestion,
+      command: questions.find((q) => q.id === selectedQuestion)?.name || '',
+      text: questions.find((q) => q.id === selectedQuestion)?.name || '',
+      photo: null,
+      buttons: buttons,
     };
-  
-    console.log('POST yuborilayotgan ma\'lumotlar:', payload);
-  
+
     try {
-      // API'ga yuborish
       await axios.post('https://testpost.uz/botmessages/', payload, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      message.success('Ma\'lumotlar muvaffaqiyatli yuborildi!');
-      setData([...data, payload]); // Yangi ma'lumotlarni mahalliy holatga qo'shish
-      setIsAddModalOpen(false); // Modalni yopish
-      resetModal(); // Modalni tozalash
+      message.success('Data saved successfully!');
+      setData([...data, payload]);
+      setIsAddModalOpen(false);
+      resetModal();
     } catch (error) {
-      console.error('Ma\'lumotlarni yuborishda xatolik:', error.response?.data || error.message);
-      message.error('Ma\'lumotlarni yuborishda muammo bo‘ldi.');
+      console.error(
+        'Error saving data:',
+        error.response?.data || error.message,
+      );
+      message.error('Failed to save data.');
     }
   };
-  
 
   const addRow = () => {
     if (rows.length >= MAX_ROWS) {
@@ -100,7 +123,7 @@ const AddButton = () => {
       message.warning('Maksimal tugmalar soniga yetdingiz!');
       return;
     }
-  
+
     setRows(
       rows.map((row) => {
         if (row.id === rowId && row.buttons.length < MAX_BUTTONS_PER_ROW) {
@@ -115,17 +138,16 @@ const AddButton = () => {
             static: false,
             message: selectedQuestion,
           };
-  
+
           return {
             ...row,
             buttons: [...row.buttons, newButton],
           };
         }
         return row;
-      })
+      }),
     );
   };
-  
 
   const removeLastButton = (rowId) => {
     setRows(
@@ -137,7 +159,7 @@ const AddButton = () => {
           };
         }
         return row;
-      })
+      }),
     );
   };
 
@@ -151,9 +173,11 @@ const AddButton = () => {
 
     const updatedButton = {
       text: values.label,
-      text_response: values.callbackData || (isStatic
-        ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
-        : `{count_people} человек выбрали этот ответ ({percent}%)`),
+      text_response:
+        values.callbackData ||
+        (isStatic
+          ? `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
+          : `{count_people} человек выбрали этот ответ ({percent}%)`),
       callback_data: values.callbackData || 'None',
       row: editingButton.row,
       position: editingButton.position,
@@ -162,9 +186,9 @@ const AddButton = () => {
       static: isStatic,
       message: selectedQuestion,
     };
-  
-    console.log('PUT yuborilayotgan ma\'lumotlar:', updatedButton);
-  
+
+    console.log("PUT yuborilayotgan ma'lumotlar:", updatedButton);
+
     try {
       await axios.post('https://testpost.uz/inline_buttons/', updatedButton, {
         headers: {
@@ -185,29 +209,39 @@ const AddButton = () => {
             };
           }
           return row; // Boshqa qatorlar o'z holatida qoladi
-        })
+        }),
       );
       setIsEditButtonModalOpen(false);
       setEditingButton(null);
       message.success('Tugma muvaffaqiyatli tahrirlandi!');
     } catch (error) {
-      console.error('Tugmani tahrirlashda xatolik:', error.response?.data || error.message);
-      message.error('Tugmani tahrirlashda muammo bo‘ldi.');
+      console.error(
+        'Tugmani tahrirlashda xatolik:',
+        error.response?.data || error.message,
+      );
+      message.error("Tugmani tahrirlashda muammo bo'ldi.");
     }
   };
-  
 
   const deleteRow = (rowId) => {
     setRows(rows.filter((row) => row.id !== rowId));
   };
 
   const handleEdit = (record) => {
-    setSelectedQuestion(record.questionId);
+    setSelectedQuestion(record.id);
     setRows([
       {
         id: record.id,
         buttons: record.buttons.map((button) => ({
           ...button,
+          label: button.text,
+          callbackData: button.text_response,
+          row: button.row,
+          position: button.position,
+          is_correct: button.is_correct,
+          is_comment: button.is_comment,
+          static: button.static,
+          message: button.message,
         })),
       },
     ]);
@@ -221,44 +255,28 @@ const AddButton = () => {
         style={{ marginBottom: 16 }}
         onClick={() => setIsAddModalOpen(true)}
       >
-        Tugma qo‘shish
+        Tugma qo'shish
       </Button>
       <Table dataSource={data} rowKey="id">
+        <Column title="Question" dataIndex="command" key="command" />
         <Column
-          title="Savol Nomi"
-          dataIndex="questionId"
-          key="questionId"
-          render={(questionId) =>
-            questions.find((q) => q.id === questionId)?.name || 'Noma’lum'
-          }
-        />
-        <Column
-          title="Tugmalar soni"
+          title="Buttons"
           dataIndex="buttons"
           key="buttons"
           render={(buttons) => buttons?.length || 0}
         />
         <Column
-          title="Action"
-          key="action"
+          title="Actions"
+          key="actions"
+          width={100}
           render={(_, record) => (
             <Space size="middle">
               <Button
-                type="link"
+                type="text"
+                icon={<EditOutlined />}
                 onClick={() => handleEdit(record)}
-              >
-                Edit
-              </Button>
-              <Button
-                type="link"
-                danger
-                onClick={() => {
-                  setData(data.filter((item) => item.id !== record.id));
-                  message.success('Tugma muvaffaqiyatli o‘chirildi!');
-                }}
-              >
-                Delete
-              </Button>
+              />
+            
             </Space>
           )}
         />
@@ -266,7 +284,7 @@ const AddButton = () => {
 
       {/* Add Modal */}
       <Modal
-        title="Tugma qo‘shish"
+        title="Tugma qo'shish"
         open={isAddModalOpen}
         onCancel={() => {
           setIsAddModalOpen(false);
@@ -309,7 +327,7 @@ const AddButton = () => {
                     <Button onClick={() => addButton(row.id)}>+</Button>
                   )}
                   {row.buttons.length > 0 && (
-                    <Button onClick={() => removeLastButton(row.id)}>-</Button> 
+                    <Button onClick={() => removeLastButton(row.id)}>-</Button>
                   )}
                 </div>
                 <Button
@@ -318,13 +336,13 @@ const AddButton = () => {
                   onClick={() => deleteRow(row.id)}
                   style={{ marginTop: 8 }}
                 >
-                  Qatorni o‘chirish
+                  Qatorni o'chirish
                 </Button>
               </div>
             ))}
             {rows.length < MAX_ROWS && (
               <Button onClick={addRow} style={{ marginTop: 16 }}>
-                Qator qo‘shish
+                Qator qo'shish
               </Button>
             )}
           </div>
@@ -344,10 +362,7 @@ const AddButton = () => {
         onCancel={() => setIsEditButtonModalOpen(false)}
         footer={null}
       >
-        <Form
-          initialValues={editingButton}
-          onFinish={saveEditedButton}
-        >
+        <Form initialValues={editingButton} onFinish={saveEditedButton}>
           <Form.Item
             name="label"
             label="Tugma nomi"
@@ -357,7 +372,10 @@ const AddButton = () => {
           </Form.Item>
           <Form.Item label="Javob to'g'ri">
             {rows.some((row) =>
-              row.buttons.some((button) => button.is_correct && button.id !== editingButton?.id)
+              row.buttons.some(
+                (button) =>
+                  button.is_correct && button.id !== editingButton?.id,
+              ),
             ) && !editingButton?.is_correct ? (
               <span>Faqat bitta tugma "Javob to'g'ri" bo'lishi mumkin</span>
             ) : (
@@ -450,8 +468,10 @@ const AddButton = () => {
                 }}
                 onFocus={(e) => {
                   if (
-                    e.target.value === `{count_people} человек выбрали этот ответ ({percent}%)` ||
-                    e.target.value === `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
+                    e.target.value ===
+                      `{count_people} человек выбрали этот ответ ({percent}%)` ||
+                    e.target.value ===
+                      `📊 Статистика\n\n{buttons_info}\n\n👥 Всего участников: {all_count}`
                   ) {
                     e.target.value = ''; // Foydalanuvchi yozmoqchi bo'lsa, qiymatni tozalash
                   }

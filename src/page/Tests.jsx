@@ -1,10 +1,20 @@
 import { useState, useEffect } from 'react';
 import { DeleteOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Input, Space, Table, message, Modal, Form, Select, Upload } from 'antd';
+import {
+  Button,
+  Input,
+  Space,
+  Table,
+  message,
+  Modal,
+  Form,
+  Select,
+  Upload,
+} from 'antd';
 import axios from 'axios';
 
-const API_URL = "https://testpost.uz/bot_messages/";
-const SEND_MESSAGE_URL = "https://testpost.uz/send-message/";
+const API_URL = 'https://testpost.uz/bot_messages/';
+const SEND_MESSAGE_URL = 'https://testpost.uz/send-message/';
 
 const Tests = () => {
   const [data, setData] = useState([]);
@@ -27,36 +37,47 @@ const Tests = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(API_URL);
-      setData(response.data.map((item) => ({
-        key: item.id,
-        testName: item.command,
-        text: item.text,
-        photo: item.photo, // Rasmni qo'shish
-      })));
+      setData(
+        response.data.map((item) => ({
+          key: item.id,
+          testName: item.command,
+          text: item.text,
+          photo: item.photo, // Rasmni qo'shish
+        })),
+      );
     } catch (error) {
       console.error("Ma'lumotlarni yuklashda xatolik:", error);
-      message.warning("Ma'lumotlarni yuklashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
+      message.warning(
+        "Ma'lumotlarni yuklashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.",
+      );
     }
   };
 
   const fetchGroups = async () => {
     try {
       const response = await axios.get('https://testpost.uz/chanel_groups/');
-      setGroups(response.data.map((group) => ({ id: group.id, name: group.group_name })));
+      setGroups(
+        response.data.map((group) => ({
+          id: group.id,
+          name: group.group_name,
+        })),
+      );
     } catch (error) {
-      console.error("Guruhlarni yuklashda xatolik:", error);
-      message.warning("Guruhlarni yuklashda muammo bo‘ldi.");
+      console.error('Guruhlarni yuklashda xatolik:', error);
+      message.warning('Guruhlarni yuklashda muammo bo‘ldi.');
     }
   };
 
   const handleDeleteTest = async (key) => {
     try {
       await axios.delete(`${API_URL}${key}/`);
-      message.success("Test o‘chirildi");
+      message.success('Test o‘chirildi');
       fetchData();
     } catch (error) {
-      console.error("Testni o‘chirishda xatolik:", error);
-      message.warning("Testni o‘chirishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
+      console.error('Testni o‘chirishda xatolik:', error);
+      message.warning(
+        'Testni o‘chirishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.',
+      );
     }
   };
 
@@ -84,13 +105,15 @@ const Tests = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      message.success("Yangi test qo‘shildi!");
+      message.success('Yangi test qo‘shildi!');
       setIsModalOpen(false);
       setImage(null); // Rasmni tozalash
       fetchData();
     } catch (error) {
       console.error("Testni qo'shishda xatolik:", error);
-      message.warning("Testni qo'shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
+      message.warning(
+        "Testni qo'shishda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.",
+      );
     }
   };
 
@@ -120,13 +143,15 @@ const Tests = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      message.success("Test yangilandi");
+      message.success('Test yangilandi');
       setIsEditModalOpen(false);
       setEditImage(null); // Rasmni tozalash
       fetchData(); // Ma'lumotlarni qayta yuklash
     } catch (error) {
-      console.error("Testni yangilashda xatolik:", error);
-      message.warning("Testni yangilashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.");
+      console.error('Testni yangilashda xatolik:', error);
+      message.warning(
+        'Testni yangilashda muammo bo‘ldi. Iltimos, qayta urinib ko‘ring.',
+      );
     }
   };
 
@@ -148,11 +173,11 @@ const Tests = () => {
 
   const handleSubmit = async () => {
     if (selectedTests.length === 0) {
-      message.warning("Hech qanday test tanlanmagan!");
+      message.warning('Hech qanday test tanlanmagan!');
       return;
     }
     if (selectedGroups.length === 0) {
-      message.warning("Hech qanday guruh tanlanmagan!");
+      message.warning('Hech qanday guruh tanlanmagan!');
       return;
     }
 
@@ -199,8 +224,15 @@ const Tests = () => {
       key: 'action',
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => handleEditTest(record)} />
-          <Button icon={<DeleteOutlined />} onClick={() => handleDeleteTest(record.key)} danger />
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => handleEditTest(record)}
+          />
+          <Button
+            icon={<DeleteOutlined />}
+            onClick={() => handleDeleteTest(record.key)}
+            danger
+          />
         </Space>
       ),
     },
@@ -209,7 +241,14 @@ const Tests = () => {
   return (
     <div>
       <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setIsModalOpen(true); }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            form.resetFields();
+            setIsModalOpen(true);
+          }}
+        >
           Test qo‘shish
         </Button>
       </Space>
@@ -256,13 +295,30 @@ const Tests = () => {
       )}
 
       {/* Modal for adding a new test */}
-      <Modal title="Test qo‘shish" open={isModalOpen} onCancel={() => setIsModalOpen(false)} footer={null}>
+      <Modal
+        title="Test qo‘shish"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+      >
         <Form form={form} onFinish={handleAddTest}>
-          <Form.Item name="testName" label="Test nomi" rules={[{ required: true, message: 'Test nomini kiriting!' }]}>
+          <Form.Item
+            name="testName"
+            label="Test nomi"
+            rules={[{ required: true, message: 'Test nomini kiriting!' }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="text" label="Savol" rules={[{ required: true, message: 'Savol kiriting!' }]}>
-            <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 4, maxRows: 4 }} />
+          <Form.Item
+            name="text"
+            label="Savol"
+            rules={[{ required: true, message: 'Savol kiriting!' }]}
+          >
+            <Input.TextArea
+              maxLength={200}
+              showCount
+              autoSize={{ minRows: 4, maxRows: 4 }}
+            />
           </Form.Item>
           <Form.Item label="Rasm yuklash">
             <Upload
@@ -275,19 +331,38 @@ const Tests = () => {
             </Upload>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">Saqlash</Button>
+            <Button type="primary" htmlType="submit">
+              Saqlash
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
 
       {/* Modal for editing a test */}
-      <Modal title="Testni tahrirlash" open={isEditModalOpen} onCancel={() => setIsEditModalOpen(false)} footer={null}>
+      <Modal
+        title="Testni tahrirlash"
+        open={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        footer={null}
+      >
         <Form form={editForm} onFinish={handleUpdateTest}>
-          <Form.Item name="testName" label="Test nomi" rules={[{ required: true, message: 'Test nomini kiriting!' }]}>
+          <Form.Item
+            name="testName"
+            label="Test nomi"
+            rules={[{ required: true, message: 'Test nomini kiriting!' }]}
+          >
             <Input maxLength={200} />
           </Form.Item>
-          <Form.Item name="text" label="Savol" rules={[{ required: true, message: 'Textni kiriting!' }]}>
-            <Input.TextArea maxLength={200} showCount autoSize={{ minRows: 4, maxRows: 4 }} />
+          <Form.Item
+            name="text"
+            label="Savol"
+            rules={[{ required: true, message: 'Textni kiriting!' }]}
+          >
+            <Input.TextArea
+              maxLength={200}
+              showCount
+              autoSize={{ minRows: 4, maxRows: 4 }}
+            />
           </Form.Item>
           <Form.Item label="Rasmni tahrirlash">
             <Upload
@@ -302,7 +377,10 @@ const Tests = () => {
                         uid: '-1',
                         name: 'Mavjud rasm',
                         status: 'done',
-                        url: typeof editImage === 'string' ? editImage : URL.createObjectURL(editImage),
+                        url:
+                          typeof editImage === 'string'
+                            ? editImage
+                            : URL.createObjectURL(editImage),
                       },
                     ]
                   : []
@@ -312,7 +390,9 @@ const Tests = () => {
             </Upload>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">Yangilash</Button>
+            <Button type="primary" htmlType="submit">
+              Yangilash
+            </Button>
           </Form.Item>
         </Form>
       </Modal>
