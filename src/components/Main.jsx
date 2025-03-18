@@ -14,6 +14,7 @@ import {
 import { Layout, Menu, theme } from 'antd';
 import { useState } from 'react';
 import User from "../page/User";
+import AddButton from "../page/AddButton";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -34,8 +35,9 @@ const Main = () => {
     const items = [
         getItem('Kanal va Guruh', '1', <PieChartOutlined />, () => navigate('/channel')),
         getItem('Testlar', '2', <DesktopOutlined />, () => navigate('/tests')),
-        getItem('User', '3', <UsergroupAddOutlined />,() =>navigate('/user')),
-        getItem('Chiqish', '4', <LogoutOutlined style={{color: 'red'}} />, () => {
+        getItem('Tugma qo`shish', '3', <DesktopOutlined />, () => navigate('/addbutton')),
+        getItem('User', '4', <UsergroupAddOutlined />,() =>navigate('/user')),
+        getItem('Chiqish', '5', <LogoutOutlined style={{color: 'red'}} />, () => {
             localStorage.removeItem('token'); // 🔥 Tokenni o‘chirish (logout)
             navigate('/login'); // Login sahifasiga yo‘naltirish
         }),
@@ -77,6 +79,14 @@ const Main = () => {
                                 element={
                                     <ProtectedRoute>
                                         <Tests />
+                                    </ProtectedRoute>
+                                }
+                            />
+                             <Route
+                                path="/addbutton"
+                                element={
+                                    <ProtectedRoute>
+                                        < AddButton/>
                                     </ProtectedRoute>
                                 }
                             />
