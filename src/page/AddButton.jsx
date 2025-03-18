@@ -20,9 +20,7 @@ const AddButton = () => {
   const [questions, setQuestions] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditButtonModalOpen, setIsEditButtonModalOpen] = useState(false);
-  const [rows, setRows] = useState([
-    { id: Date.now().toString(), buttons: [] },
-  ]);
+  const [rows, setRows] = useState([{ id: Date.now(), buttons: [] }]);
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [editingButton, setEditingButton] = useState(null); // Tahrirlanayotgan tugma
   const MAX_BUTTONS = 30;
@@ -47,7 +45,7 @@ const AddButton = () => {
   }, []);
 
   const resetModal = () => {
-    setRows([{ id: Date.now().toString(), buttons: [] }]); // Qatorlarni tozalash
+    setRows([{ id: Date.now(), buttons: [] }]); // Qatorlarni tozalash
     setSelectedQuestion(null); // Tanlangan savolni tozalash
   };
 
@@ -66,7 +64,6 @@ const AddButton = () => {
     // Format buttons according to the required structure
     const buttons = rows.flatMap((row) =>
       row.buttons.map((button) => ({
-        id: button.id,
         message: selectedQuestion,
         text: button.label,
         callback_data: button.callbackData || 'None',
@@ -79,15 +76,12 @@ const AddButton = () => {
     );
 
     const payload = {
-      id: selectedQuestion,
-      command: questions.find((q) => q.id === selectedQuestion)?.name || '',
-      text: questions.find((q) => q.id === selectedQuestion)?.name || '',
-      photo: null,
+      message: selectedQuestion,
       buttons: buttons,
     };
 
     try {
-      await axios.patch('https://testpost.uz/botmessages/', payload, {
+      await axios.put('https://testpost.uz/update-buttons/', payload, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -112,7 +106,7 @@ const AddButton = () => {
     }
     setRows((prevRows) => [
       ...prevRows,
-      { id: Date.now().toString(), buttons: [], row: prevRows.length }, // Qatorning `row` qiymati indeksga teng
+      { id: Date.now(), buttons: [], row: prevRows.length }, // Qatorning `row` qiymati indeksga teng
     ]);
   };
 
@@ -127,7 +121,6 @@ const AddButton = () => {
       rows.map((row) => {
         if (row.id === rowId && row.buttons.length < MAX_BUTTONS_PER_ROW) {
           const newButton = {
-            id: Date.now().toString(), // Yangi tugma uchun vaqtga asoslangan ID
             label: `Tugma ${row.buttons.length + 1}`,
             callbackData: '',
             row: row.row, // Tugmaning `row` qiymati qatorning `row` qiymatiga teng
