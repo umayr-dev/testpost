@@ -10,7 +10,7 @@ import {
   Select,
   Switch,
 } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Column } = Table;
@@ -51,16 +51,16 @@ const AddButton = () => {
 
   const handleAdd = async () => {
     if (!selectedQuestion) {
-      message.error('Please select a question!');
+      message.error('Savolni tanlang!');
       return;
     }
-
+  
     const totalButtons = rows.reduce((acc, row) => acc + row.buttons.length, 0);
     if (totalButtons === 0) {
-      message.error('No buttons added!');
+      message.error('Hech qanday tugma qo‘shilmagan!');
       return;
     }
-
+  
     // Format buttons according to the required structure
     const buttons = rows.flatMap((row) =>
       row.buttons.map((button) => ({
@@ -72,32 +72,30 @@ const AddButton = () => {
         is_correct: button.is_correct || false,
         is_comment: button.is_comment || false,
         static: button.static || false,
-      })),
+      }))
     );
-
+  
     const payload = {
       message: selectedQuestion,
       buttons: buttons,
     };
-
+  
     try {
       await axios.put('https://testpost.uz/update-buttons/', payload, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      message.success('Data saved successfully!');
-      setData([...data, payload]);
+      message.success('Ma\'lumotlar muvaffaqiyatli saqlandi!');
       setIsAddModalOpen(false);
       resetModal();
+      window.location.reload(); // Sahifani qayta yuklash
     } catch (error) {
-      console.error(
-        'Error saving data:',
-        error.response?.data || error.message,
-      );
-      message.error('Failed to save data.');
+      console.error('Ma\'lumotlarni saqlashda xatolik:', error.response?.data || error.message);
+      message.error('Ma\'lumotlarni saqlashda muammo bo‘ldi.');
     }
   };
+  
 
   const addRow = () => {
     if (rows.length >= MAX_ROWS) {
@@ -141,19 +139,19 @@ const AddButton = () => {
     );
   };
 
-  const removeLastButton = (rowId) => {
-    setRows(
-      rows.map((row) => {
-        if (row.id === rowId && row.buttons.length > 0) {
-          return {
-            ...row,
-            buttons: row.buttons.slice(0, -1), // Oxirgi tugmani o'chirish
-          };
-        }
-        return row;
-      }),
-    );
-  };
+  // const removeLastButton = (rowId) => {
+  //   setRows(
+  //     rows.map((row) => {
+  //       if (row.id === rowId && row.buttons.length > 0) {
+  //         return {
+  //           ...row,
+  //           buttons: row.buttons.slice(0, -1), // Oxirgi tugmani o'chirish
+  //         };
+  //       }
+  //       return row;
+  //     }),
+  //   );
+  // };
 
   const handleEditButton = (rowId, button) => {
     setEditingButton({ rowId, ...button });
@@ -227,7 +225,7 @@ const AddButton = () => {
         buttons: record.buttons.map((button) => ({
           ...button,
           label: button.text,
-          callbackData: button.text_response,
+          callbackData: "",
           row: button.row,
           position: button.position,
           is_correct: button.is_correct,
@@ -240,6 +238,34 @@ const AddButton = () => {
     setIsAddModalOpen(true);
   };
 
+  const handledeleteButton = async (buttonId) => {
+    try {
+      // API'ga DELETE so'rovini yuborish
+      await axios.delete(`https://testpost.uz/inline_buttons/${buttonId}/`);
+      message.success('Tugma muvaffaqiyatli o‘chirildi!');
+  
+      // Mahalliy holatdan tugmani o'chirish
+      setRows(
+        rows.map((row) => {
+          if (row.id === editingButton.rowId) {
+            return {
+              ...row,
+              buttons: row.buttons.filter((button) => button.id !== buttonId),
+            };
+          }
+          return row;
+        })
+      );
+  
+      // Modalni yopish va tahrirlanayotgan tugmani tozalash
+      setIsEditButtonModalOpen(false);
+      setEditingButton(null);
+    } catch (error) {
+      console.error('Tugmani o‘chirishda xatolik:', error.response?.data || error.message);
+      message.error('Tugmani o‘chirishda muammo bo‘ldi.');
+    }
+  };
+
   return (
     <div>
       <Button
@@ -247,7 +273,7 @@ const AddButton = () => {
         style={{ marginBottom: 16 }}
         onClick={() => setIsAddModalOpen(true)}
       >
-        Tugma qo'shish
+        Tugma qo`shish
       </Button>
       <Table dataSource={data} rowKey="id">
         <Column title="Question" dataIndex="command" key="command" />
@@ -280,6 +306,7 @@ const AddButton = () => {
         onCancel={() => {
           setIsAddModalOpen(false);
           resetModal(); // Modalni tozalash
+          // window.location.reload()
         }}
         footer={null}
       >
@@ -317,9 +344,9 @@ const AddButton = () => {
                   {row.buttons.length < MAX_BUTTONS_PER_ROW && (
                     <Button onClick={() => addButton(row.id)}>+</Button>
                   )}
-                  {row.buttons.length > 0 && (
+                  {/* {row.buttons.length > 0 && (
                     <Button onClick={() => removeLastButton(row.id)}>-</Button>
-                  )}
+                  )} */}
                 </div>
                 <Button
                   type="link"
@@ -327,13 +354,13 @@ const AddButton = () => {
                   onClick={() => deleteRow(row.id)}
                   style={{ marginTop: 8 }}
                 >
-                  Qatorni o'chirish
+                  Qatorni o`chirish
                 </Button>
               </div>
             ))}
             {rows.length < MAX_ROWS && (
               <Button onClick={addRow} style={{ marginTop: 16 }}>
-                Qator qo'shish
+                Qator qo`shish
               </Button>
             )}
           </div>
@@ -368,7 +395,7 @@ const AddButton = () => {
                   button.is_correct && button.id !== editingButton?.id,
               ),
             ) && !editingButton?.is_correct ? (
-              <span>Faqat bitta tugma "Javob to'g'ri" bo'lishi mumkin</span>
+              <span>Faqat bitta tugma <b>Javob to`g`ri</b> bo`lishi mumkin</span>
             ) : (
               <Switch
                 checked={editingButton?.is_correct}
@@ -474,6 +501,9 @@ const AddButton = () => {
           <Form.Item>
             <Button type="primary" htmlType="submit">
               Saqlash
+            </Button>
+            <Button type='primary' danger onClick={()=> handledeleteButton(editingButton.id)}>
+              O`chirish
             </Button>
           </Form.Item>
         </Form>
