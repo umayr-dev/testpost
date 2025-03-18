@@ -68,13 +68,13 @@ const User = () => {
       dataIndex: 'status',
       key: 'status',
     },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (_, record) => (
-        <Button type="text" danger icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.key)} />
-      ),
-    },
+    // {
+    //   title: 'Action',
+    //   key: 'action',
+    //   render: (_, record) => (
+    //     <Button type="text" danger icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record.key)} />
+    //   ),
+    // },
   ];
 
   return (
